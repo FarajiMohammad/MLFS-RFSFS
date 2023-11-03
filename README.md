@@ -12,7 +12,6 @@ ignores the redundancy among features. To this end, we design a Robust Flexible 
 demonstrate the effectiveness and efficiency of RFSFS.
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-MLFS-RFSFS.py
 + Run GPU
 + Code Developed Based on Updated Formulas from the Paper
 + Parameters Tuning
