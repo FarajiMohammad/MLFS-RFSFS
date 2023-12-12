@@ -107,7 +107,7 @@ for a in alpha:
                         MICAVG[avg,nu] = KNN_m1
                         KNN_m2 = f1_score(Y_test, predictions, average='macro')
                         MACAVG[avg,nu]=KNN_m2
-                        KAVP = average_precision_score(Y_test,scores)
+                        KAVP = average_precision_score(Y_test.T,scores.T)
                         AVPAVG[avg,nu]=KAVP
                         KHML = hamming_loss(Y_test,predictions)
                         HMLAVG[avg,nu]=KHML
