@@ -10,9 +10,3 @@ promising roles for multi-label feature selection. However, two important issues
 enforce sparsity on each feature across all instances while numerous selected features lack discrimination due to the generated zero weight values. Second, l 2 , 1 -norm not only neglects label- specific features but also 
 ignores the redundancy among features. To this end, we design a Robust Flexible Sparse Regularization norm (RFSR), furthermore, proposing a global optimization framework named Ro- bust Flexible Sparse regularized multi-label Feature Selection (RFSFS) based on RFSR. Finally, an efficient alternating multipliers based optimization scheme is developed to iteratively optimize RFSFS. Empirical studies on fifteen benchmark multi-label data sets 
 demonstrate the effectiveness and efficiency of RFSFS.
-
--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-+ Run GPU
-+ Code Developed Based on Updated Formulas from the Paper
-+ Parameters Tuning
-+ Calculate the Average Percentage for Each Selected Feature (1 to 20) over 5 Iterations
