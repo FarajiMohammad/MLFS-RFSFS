@@ -15,7 +15,7 @@ If you find this implementation helpful in your work, please consider citing bot
 
 ## Original Paper:
 
-'''
+```
 @article{li2023multi,
   title={Multi-label feature selection via robust flexible sparse regularization},
   author={Li, Yonghao and Hu, Liang and Gao, Wanfu},
@@ -25,10 +25,9 @@ If you find this implementation helpful in your work, please consider citing bot
   year={2023},
   publisher={Elsevier}
 }
-'''
-
+```
 ## Our Paper:
-'''
+```
 @article{faraji2024multi,
   title={Multi-label feature selection with global and local label correlation},
   author={Faraji, Mohammad and Seyedi, Seyed Amjad and Tab, Fardin Akhlaghian and Mahmoodi, Reza},
@@ -38,4 +37,4 @@ If you find this implementation helpful in your work, please consider citing bot
   year={2024},
   publisher={Elsevier}
 }
-'''
+```
