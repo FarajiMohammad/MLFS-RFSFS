@@ -1,4 +1,4 @@
-# Multi-label feature selection via robust flexible sparse regularization (2023)
+## [Multi-label feature selection via robust flexible sparse regularization (2023)](https://www.sciencedirect.com/science/article/abs/pii/S0031320322005544)
 
 Authors = Liang Hu, Yonghao Li, and , Wanfu Gao,
 
