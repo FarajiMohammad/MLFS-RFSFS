@@ -13,7 +13,8 @@ demonstrate the effectiveness and efficiency of RFSFS.
 
 If you find this implementation helpful in your work, please consider citing both the original paper and our related research on multi-label feature selection:
 
-Original Paper:
+## Original Paper:
+
 '''
 @article{li2023multi,
   title={Multi-label feature selection via robust flexible sparse regularization},
@@ -26,7 +27,7 @@ Original Paper:
 }
 '''
 
-##Our Paper:
+## Our Paper:
 '''
 @article{faraji2024multi,
   title={Multi-label feature selection with global and local label correlation},
