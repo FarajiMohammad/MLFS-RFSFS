@@ -3,6 +3,7 @@ from tqdm import tqdm
 import numpy as np
 from scipy.io import loadmat
 from skmultilearn.adapt import MLkNN
+from pathlib import Path
 from LBLC import corr
 # Metrics
 from sklearn.metrics import coverage_error
@@ -11,10 +12,19 @@ from sklearn.metrics import label_ranking_loss
 from sklearn.metrics import average_precision_score
 from sklearn.metrics import hamming_loss
 from sklearn.metrics import zero_one_loss
+import pandas as pd
 import os
 import warnings
 warnings.filterwarnings('ignore')
 
+def one_error(outputs, test_target):
+    err_cnt = 0
+    for i in range(outputs.shape[0]):
+        idx = np.argmax(outputs[i])
+        if test_target[i, idx] != 1:
+            err_cnt += 1
+    one_error = err_cnt / outputs.shape[0]
+    return one_error
 
 GPU = False
 if GPU:
@@ -26,7 +36,7 @@ if GPU:
 else:
     dtype = torch.FloatTensor
     print("CPU")
- 
+    
 def one_error(outputs, test_target):
     err_cnt = 0
     for i in range(outputs.shape[0]):
@@ -37,9 +47,22 @@ def one_error(outputs, test_target):
     return one_error
 
 
+ppn=0
+
+csv_file = f'RFSFS.csv'
+if not os.path.isfile(csv_file):
+    attrs = ['DB','lam1','lam2','lam3','MIC', 'MAC' , 'AVP', 'HML' , 'RNL'  , 'CVE', 'ZRE','One-E']
+    df = pd.DataFrame(columns=attrs)
+    df.to_csv(csv_file, index=False)
+else:
+        df = pd.read_csv(csv_file)
+
+dataset_name = Path(f'{datasetML[db]}').stem
+
 datas =['Arts','Business','Computers','Entertainment','Recreation','Society']
 
-dat = loadmat('../../Datasets/' + datas[0] + ".mat")
+dat = loadmat('../Datasets/' + datas[0] + ".mat")
+
 train = dat['train']
 test = dat['test']
 
@@ -88,7 +111,7 @@ for a in alpha:
                 ZERAVG = torch.zeros((3))   
                 AVPAVG = torch.zeros((3))  
                 ONEAVG = torch.zeros((3))
-                for avg in range(5):
+                for avg in range(3):
                     W = np.random.rand(d,l)
                     for i in range(t):
                         Q  = 1/np.maximum( 2 *np.abs(W),epsilon)
@@ -97,31 +120,30 @@ for a in alpha:
                         W  = W * (Wu / np.maximum(Wd , epsilon))
                     WW = np.linalg.norm(W,axis=1,ord=2)
                     sQ = np.argsort(WW)
-                    nu=0
-                   nosf = int (20 * d / 100)
+                    nosf = int (20 * d / 100)
                     sX = Xc[:,sQ[d-nosf:]]
                     classifier = MLkNN(k=4)
-                    classifier.fit(sX, Yn.astype(int))
+                    classifier.fit(sX, Yc.astype(int))
                     # predict
-                    predictions = classifier.predict(X_test[:,sQ[d-nosf:].long()]).toarray()
-                    scores = classifier.predict_proba(X_test[:,sQ[d-nosf:].long()]).toarray()
+                    predictions = classifier.predict(X_test[:,sQ[d-nosf:]]).toarray()
+                    scores = classifier.predict_proba(X_test[:,sQ[d-nosf:]]).toarray()
 
                     MIC = f1_score(Y_test, predictions, average='micro')
-                    MICAVG[iv] = MIC
+                    MICAVG[avg] = MIC
                     MAC = f1_score(Y_test, predictions, average='macro')
-                    MACAVG[iv] = MAC
+                    MACAVG[avg] = MAC
                     AVP = average_precision_score(Y_test.T,scores.T)
-                    AVPAVG[iv] = AVP
+                    AVPAVG[avg] = AVP
                     HML = hamming_loss(Y_test,predictions)
-                    HMLAVG[iv] = HML
+                    HMLAVG[avg] = HML
                     RNL = label_ranking_loss(Y_test,scores)
-                    RNLAVG[iv] = RNL
+                    RNLAVG[avg] = RNL
                     ZER = zero_one_loss(Y_test,predictions)
-                    ZERAVG[iv] = ZER
+                    ZERAVG[avg] = ZER
                     CVE = coverage_error(Y_test,scores)
-                    CVEAVG[iv] = CVE
+                    CVEAVG[avg] = CVE
                     ONE = one_error(predictions,Y_test)
-                    ONEAVG[iv] = ONE
+                    ONEAVG[avg] = ONE
 
                 MICNPY = MICAVG.numpy()
                 MACNPY = MACAVG.numpy()
@@ -133,9 +155,9 @@ for a in alpha:
                 ONENPY = ONEAVG.numpy()
                 new_row = pd.DataFrame({
                         'DB': [dataset_name],
-                        'lam1': [lam1],
-                        'lam2': [lam2],
-                        'lam3':[lam3],
+                        'lam1': [a],
+                        'lam2': [b],
+                        'lam3':[g],
                         'MIC': [np.mean(MICNPY)],
                         'MAC': [np.mean(MACNPY)],
                         'AVP': [np.mean(AVPNPY)],
