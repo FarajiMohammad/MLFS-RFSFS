@@ -26,6 +26,16 @@ if GPU:
 else:
     dtype = torch.FloatTensor
     print("CPU")
+ 
+def one_error(outputs, test_target):
+    err_cnt = 0
+    for i in range(outputs.shape[0]):
+        idx = np.argmax(outputs[i])
+        if test_target[i, idx] != 1:
+            err_cnt += 1
+    one_error = err_cnt / outputs.shape[0]
+    return one_error
+
 
 datas =['Arts','Business','Computers','Entertainment','Recreation','Society']
 
@@ -58,33 +68,28 @@ S, D = corr(Y)
 L = D - S
 
 dd =np.ones((d,d))
-W = np.random.rand(d,l)
 #Parameters Truning
 alpha  = [0.01,0.1]
 beta   = [0.01,0.1]
 gamma  = [0.01,0.1]
 
 t = 50
-MiF1A=[]
-MaF1A=[]
-AVP_AVGA=[]
-HML_AVGA=[]
-RNL_AVGA=[]
-CVE_AVGA=[]
-ZER_AVGA=[]
 
 for a in alpha:
         for b in beta:
             for g in gamma:
                 erro= torch.zeros(t)
-                MICAVG = np.zeros((5,20))
-                MACAVG = np.zeros((5,20))
-                AVPAVG = np.zeros((5,20))
-                HMLAVG = np.zeros((5,20))
-                RNLAVG = np.zeros((5,20))
-                CVEAVG = np.zeros((5,20))
-                ZERAVG = np.zeros((5,20))
+                MICAVG = torch.zeros((3))
+                MACAVG = torch.zeros((3))
+                AVPAVG = torch.zeros((3))
+                HMLAVG = torch.zeros((3))
+                RNLAVG = torch.zeros((3))
+                CVEAVG = torch.zeros((3))
+                ZERAVG = torch.zeros((3))   
+                AVPAVG = torch.zeros((3))  
+                ONEAVG = torch.zeros((3))
                 for avg in range(5):
+                    W = np.random.rand(d,l)
                     for i in range(t):
                         Q  = 1/np.maximum( 2 *np.abs(W),epsilon)
                         Wu = (X.T @ Y + a * (W @ S) + g * (W))
@@ -93,49 +98,54 @@ for a in alpha:
                     WW = np.linalg.norm(W,axis=1,ord=2)
                     sQ = np.argsort(WW)
                     nu=0
-                    for j in tqdm(range(20)):
-                        j+=1
-                        nosf = int (j * d / 100)
-                        sX = X[:,sQ[d-nosf:]]
-                        classifier = MLkNN(k=10)
-                        classifier.fit(sX, Y.astype(int))
-                        # predict
-                        predictions = classifier.predict(X_test[:,sQ[d-nosf:]]).toarray()
-                        scores = classifier.predict_proba(X_test[:,sQ[d-nosf:]]).toarray()
+                   nosf = int (20 * d / 100)
+                    sX = Xc[:,sQ[d-nosf:]]
+                    classifier = MLkNN(k=4)
+                    classifier.fit(sX, Yn.astype(int))
+                    # predict
+                    predictions = classifier.predict(X_test[:,sQ[d-nosf:].long()]).toarray()
+                    scores = classifier.predict_proba(X_test[:,sQ[d-nosf:].long()]).toarray()
 
-                        KNN_m1 = f1_score(Y_test, predictions, average='micro')
-                        MICAVG[avg,nu] = KNN_m1
-                        KNN_m2 = f1_score(Y_test, predictions, average='macro')
-                        MACAVG[avg,nu]=KNN_m2
-                        KAVP = average_precision_score(Y_test.T,scores.T)
-                        AVPAVG[avg,nu]=KAVP
-                        KHML = hamming_loss(Y_test,predictions)
-                        HMLAVG[avg,nu]=KHML
-                        KRNL = label_ranking_loss(Y_test,scores)
-                        RNLAVG[avg,nu]=KRNL
-                        ZLos = zero_one_loss(Y_test,predictions)
-                        ZERAVG[avg,nu]=ZLos
-                        KCOV = coverage_error(Y_test,scores)
-                        CVEAVG[avg,nu]=KCOV
-                        nu+=1
-                for domean in range(20):
-                    MiF1=np.mean(MICAVG[:,domean])
-                    MiF1A.append(MiF1)
-                    MaF1=np.mean(MACAVG[:,domean])
-                    MaF1A.append(MaF1)
-                    AVP_AVG=np.mean(AVPAVG[:,domean])
-                    AVP_AVGA.append(AVP_AVG)
-                    HML_AVG=np.mean(HMLAVG[:,domean])
-                    HML_AVGA.append(HML_AVG)
-                    RNL_AVG=np.mean(RNLAVG[:,domean])
-                    RNL_AVGA.append(RNL_AVG)
-                    CVE_AVG=np.mean(CVEAVG[:,domean])
-                    CVE_AVGA.append(CVE_AVG)
-                    ZER_AVG=np.mean(ZERAVG[:,domean])
-                    ZER_AVGA.append(ZER_AVG)
-                print('MiF1-MEAN-1->20%',MiF1A,'\n',
-                      'MaF1-MEAN-1->20%',MaF1A,'\n',
-                      'HML-MEAN-1->20%',HML_AVGA,'\n',
-                      'RNL-MEAN-1->20%',RNL_AVGA,'\n',
-                      'CVE-MEAN-1->20%',CVE_AVGA,'\n',
-                      'ZRE-MEAN-1->20%',ZER_AVGA,'\n',)
+                    MIC = f1_score(Y_test, predictions, average='micro')
+                    MICAVG[iv] = MIC
+                    MAC = f1_score(Y_test, predictions, average='macro')
+                    MACAVG[iv] = MAC
+                    AVP = average_precision_score(Y_test.T,scores.T)
+                    AVPAVG[iv] = AVP
+                    HML = hamming_loss(Y_test,predictions)
+                    HMLAVG[iv] = HML
+                    RNL = label_ranking_loss(Y_test,scores)
+                    RNLAVG[iv] = RNL
+                    ZER = zero_one_loss(Y_test,predictions)
+                    ZERAVG[iv] = ZER
+                    CVE = coverage_error(Y_test,scores)
+                    CVEAVG[iv] = CVE
+                    ONE = one_error(predictions,Y_test)
+                    ONEAVG[iv] = ONE
+
+                MICNPY = MICAVG.numpy()
+                MACNPY = MACAVG.numpy()
+                AVPNPY = AVPAVG.numpy()
+                HMLNPY = HMLAVG.numpy()
+                RNLNPY = RNLAVG.numpy()
+                CVENPY = CVEAVG.numpy()
+                ZERNPY = ZERAVG.numpy()
+                ONENPY = ONEAVG.numpy()
+                new_row = pd.DataFrame({
+                        'DB': [dataset_name],
+                        'lam1': [lam1],
+                        'lam2': [lam2],
+                        'lam3':[lam3],
+                        'MIC': [np.mean(MICNPY)],
+                        'MAC': [np.mean(MACNPY)],
+                        'AVP': [np.mean(AVPNPY)],
+                        'HML': [np.mean(HMLNPY)],
+                        'RNL': [np.mean(RNLNPY)],
+                        'CVE': [np.mean(CVENPY)],
+                        'ZRE': [np.mean(ZERNPY)],
+                        'One-E':[np.mean(ONENPY)],
+                        })
+                df = pd.concat([df, new_row], ignore_index=True)
+                print("Iter: ", ppn)
+                ppn +=1
+                df.to_csv(csv_file, index=False)
