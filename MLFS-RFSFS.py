@@ -36,16 +36,6 @@ if GPU:
 else:
     dtype = torch.FloatTensor
     print("CPU")
-    
-def one_error(outputs, test_target):
-    err_cnt = 0
-    for i in range(outputs.shape[0]):
-        idx = np.argmax(outputs[i])
-        if test_target[i, idx] != 1:
-            err_cnt += 1
-    one_error = err_cnt / outputs.shape[0]
-    return one_error
-
 
 ppn=0
 
